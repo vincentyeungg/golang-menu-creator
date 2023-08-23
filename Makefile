@@ -13,4 +13,7 @@ migrateup:
 migratedown:
 	migrate -path db/migration -database "postgresql://postgres:password@localhost:5432/menu-creator-db?sslmode=disable" -verbose down
 
-.PHONY: postgres createdb dropdb migrateup migratedown
+server:
+	go run main.go
+
+.PHONY: postgres createdb dropdb migrateup migratedown server
