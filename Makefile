@@ -1,5 +1,5 @@
 postgres:
-	docker run --name menu-creator-db --network menucreator-network -p 5432:5432 -e POSTGRES_PASSWORD=password -d postgres:12-alpine
+	docker run --name menu-creator-db --network menucreator-network-p 5432:5432 -e POSTGRES_PASSWORD=password -d postgres:12-alpine
 
 createdb:
 	docker exec -it menu-creator-db createdb --username=postgres --owner=postgres menu-creator-db
