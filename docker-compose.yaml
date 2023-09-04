@@ -13,4 +13,9 @@ services:
     ports:
       - "8080:8080"
     environment:
-      - DB_SOURCE=postgresql://postgres:password@postgres:5432/menu-creator-db?sslmode=disabled
+      - DB_SOURCE=postgresql://postgres:password@postgres:5432/menu-creator-db?sslmode=disable
+    depends_on:
+      - postgres
+    # using entrypoint overrides the command in dockerfile, need to explicitly run command here
+    entrypoint: [ "/app/wait-for.sh", "postgres:5432", "--", "/app/start.sh" ]
+    command: [ "/app/main" ]
