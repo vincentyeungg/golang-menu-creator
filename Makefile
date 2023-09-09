@@ -13,6 +13,9 @@ migrateup:
 migratedown:
 	migrate -path db/migration -database "postgresql://postgres:password@localhost:5432/menu-creator-db?sslmode=disable" -verbose down
 
+sqlc:
+	sqlc generate
+
 server:
 	go run main.go
 
@@ -20,4 +23,4 @@ server:
 menucreator:
 	docker run --name menucreator --network menucreator-network -p 8080:8080 -e DB_SOURCE="postgresql://postgres:password@menu-creator-db:5432/menu-creator-db?sslmode=disabled" menucreator:latest
 
-.PHONY: postgres createdb dropdb migrateup migratedown server
+.PHONY: postgres createdb dropdb migrateup migratedown sqlc server
