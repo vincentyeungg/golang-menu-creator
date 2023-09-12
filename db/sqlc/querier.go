@@ -7,7 +7,21 @@ import (
 )
 
 type Querier interface {
+	CreateIngredient(ctx context.Context, arg CreateIngredientParams) (Ingredient, error)
+	CreateMenu(ctx context.Context, arg CreateMenuParams) (Menu, error)
 	CreateMenuItem(ctx context.Context, arg CreateMenuItemParams) (MenuItem, error)
+	DeleteIngredient(ctx context.Context, id int32) error
+	DeleteMenu(ctx context.Context, id int32) error
+	DeleteMenuItem(ctx context.Context, id int32) error
+	GetAllIngredient(ctx context.Context) ([]Ingredient, error)
+	GetAllMenuItems(ctx context.Context) ([]MenuItem, error)
+	GetAllMenus(ctx context.Context) ([]Menu, error)
+	GetIngredient(ctx context.Context, id int32) (Ingredient, error)
+	GetMenu(ctx context.Context, id int32) (Menu, error)
+	GetMenuItem(ctx context.Context, id int32) (MenuItem, error)
+	UpdateIngredient(ctx context.Context, arg UpdateIngredientParams) (Ingredient, error)
+	UpdateMenu(ctx context.Context, arg UpdateMenuParams) (Menu, error)
+	UpdateMenuItem(ctx context.Context, arg UpdateMenuItemParams) (MenuItem, error)
 }
 
 var _ Querier = (*Queries)(nil)

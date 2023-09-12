@@ -34,3 +34,98 @@ func (q *Queries) CreateMenuItem(ctx context.Context, arg CreateMenuItemParams) 
 	)
 	return i, err
 }
+
+const deleteMenuItem = `-- name: DeleteMenuItem :exec
+DELETE FROM "MenuItem"
+WHERE id = $1
+`
+
+func (q *Queries) DeleteMenuItem(ctx context.Context, id int32) error {
+	_, err := q.db.ExecContext(ctx, deleteMenuItem, id)
+	return err
+}
+
+const getAllMenuItems = `-- name: GetAllMenuItems :many
+SELECT id, name, description, price, created_at
+FROM "MenuItem"
+`
+
+func (q *Queries) GetAllMenuItems(ctx context.Context) ([]MenuItem, error) {
+	rows, err := q.db.QueryContext(ctx, getAllMenuItems)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []MenuItem{}
+	for rows.Next() {
+		var i MenuItem
+		if err := rows.Scan(
+			&i.ID,
+			&i.Name,
+			&i.Description,
+			&i.Price,
+			&i.CreatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getMenuItem = `-- name: GetMenuItem :one
+SELECT id, name, description, price, created_at 
+FROM "MenuItem" 
+WHERE id = $1
+`
+
+func (q *Queries) GetMenuItem(ctx context.Context, id int32) (MenuItem, error) {
+	row := q.db.QueryRowContext(ctx, getMenuItem, id)
+	var i MenuItem
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.Description,
+		&i.Price,
+		&i.CreatedAt,
+	)
+	return i, err
+}
+
+const updateMenuItem = `-- name: UpdateMenuItem :one
+UPDATE "MenuItem"
+SET name = $1, description = $2, price = $3 
+WHERE id = $4 
+RETURNING id, name, description, price, created_at
+`
+
+type UpdateMenuItemParams struct {
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	Price       string `json:"price"`
+	ID          int32  `json:"id"`
+}
+
+func (q *Queries) UpdateMenuItem(ctx context.Context, arg UpdateMenuItemParams) (MenuItem, error) {
+	row := q.db.QueryRowContext(ctx, updateMenuItem,
+		arg.Name,
+		arg.Description,
+		arg.Price,
+		arg.ID,
+	)
+	var i MenuItem
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.Description,
+		&i.Price,
+		&i.CreatedAt,
+	)
+	return i, err
+}
