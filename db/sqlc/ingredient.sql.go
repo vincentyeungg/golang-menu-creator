@@ -13,7 +13,7 @@ INSERT INTO "Ingredient" (
 ) VALUES (
   $1, $2, $3
 )
-RETURNING id, name, brand_name, description, created_at
+RETURNING id, name, brand_name, description, created_at, created_by, updated_at, updated_by, status
 `
 
 type CreateIngredientParams struct {
@@ -31,6 +31,10 @@ func (q *Queries) CreateIngredient(ctx context.Context, arg CreateIngredientPara
 		&i.BrandName,
 		&i.Description,
 		&i.CreatedAt,
+		&i.CreatedBy,
+		&i.UpdatedAt,
+		&i.UpdatedBy,
+		&i.Status,
 	)
 	return i, err
 }
@@ -46,12 +50,19 @@ func (q *Queries) DeleteIngredient(ctx context.Context, id int32) error {
 }
 
 const getAllIngredient = `-- name: GetAllIngredient :many
-SELECT id, name, brand_name, description, created_at
-FROM "Ingredient"
+SELECT id, name, brand_name, description, created_at, created_by, updated_at, updated_by, status
+FROM "Ingredient" 
+LIMIT $1 
+OFFSET $2
 `
 
-func (q *Queries) GetAllIngredient(ctx context.Context) ([]Ingredient, error) {
-	rows, err := q.db.QueryContext(ctx, getAllIngredient)
+type GetAllIngredientParams struct {
+	Limit  int32 `json:"limit"`
+	Offset int32 `json:"offset"`
+}
+
+func (q *Queries) GetAllIngredient(ctx context.Context, arg GetAllIngredientParams) ([]Ingredient, error) {
+	rows, err := q.db.QueryContext(ctx, getAllIngredient, arg.Limit, arg.Offset)
 	if err != nil {
 		return nil, err
 	}
@@ -65,6 +76,10 @@ func (q *Queries) GetAllIngredient(ctx context.Context) ([]Ingredient, error) {
 			&i.BrandName,
 			&i.Description,
 			&i.CreatedAt,
+			&i.CreatedBy,
+			&i.UpdatedAt,
+			&i.UpdatedBy,
+			&i.Status,
 		); err != nil {
 			return nil, err
 		}
@@ -80,9 +95,10 @@ func (q *Queries) GetAllIngredient(ctx context.Context) ([]Ingredient, error) {
 }
 
 const getIngredient = `-- name: GetIngredient :one
-SELECT id, name, brand_name, description, created_at 
+SELECT id, name, brand_name, description, created_at, created_by, updated_at, updated_by, status 
 FROM "Ingredient" 
-WHERE id = $1
+WHERE id = $1 
+LIMIT 1
 `
 
 func (q *Queries) GetIngredient(ctx context.Context, id int32) (Ingredient, error) {
@@ -94,6 +110,10 @@ func (q *Queries) GetIngredient(ctx context.Context, id int32) (Ingredient, erro
 		&i.BrandName,
 		&i.Description,
 		&i.CreatedAt,
+		&i.CreatedBy,
+		&i.UpdatedAt,
+		&i.UpdatedBy,
+		&i.Status,
 	)
 	return i, err
 }
@@ -102,7 +122,7 @@ const updateIngredient = `-- name: UpdateIngredient :one
 UPDATE "Ingredient"
 SET name = $1, brand_name = $2, description = $3 
 WHERE id = $4 
-RETURNING id, name, brand_name, description, created_at
+RETURNING id, name, brand_name, description, created_at, created_by, updated_at, updated_by, status
 `
 
 type UpdateIngredientParams struct {
@@ -126,6 +146,10 @@ func (q *Queries) UpdateIngredient(ctx context.Context, arg UpdateIngredientPara
 		&i.BrandName,
 		&i.Description,
 		&i.CreatedAt,
+		&i.CreatedBy,
+		&i.UpdatedAt,
+		&i.UpdatedBy,
+		&i.Status,
 	)
 	return i, err
 }

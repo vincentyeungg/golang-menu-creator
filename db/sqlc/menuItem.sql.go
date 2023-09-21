@@ -13,7 +13,7 @@ INSERT INTO "MenuItem" (
 ) VALUES (
   $1, $2, $3
 )
-RETURNING id, name, description, price, created_at
+RETURNING id, name, description, price, created_at, created_by, updated_at, updated_by, status
 `
 
 type CreateMenuItemParams struct {
@@ -31,6 +31,10 @@ func (q *Queries) CreateMenuItem(ctx context.Context, arg CreateMenuItemParams) 
 		&i.Description,
 		&i.Price,
 		&i.CreatedAt,
+		&i.CreatedBy,
+		&i.UpdatedAt,
+		&i.UpdatedBy,
+		&i.Status,
 	)
 	return i, err
 }
@@ -46,12 +50,19 @@ func (q *Queries) DeleteMenuItem(ctx context.Context, id int32) error {
 }
 
 const getAllMenuItems = `-- name: GetAllMenuItems :many
-SELECT id, name, description, price, created_at
-FROM "MenuItem"
+SELECT id, name, description, price, created_at, created_by, updated_at, updated_by, status
+FROM "MenuItem" 
+LIMIT $1 
+OFFSET $2
 `
 
-func (q *Queries) GetAllMenuItems(ctx context.Context) ([]MenuItem, error) {
-	rows, err := q.db.QueryContext(ctx, getAllMenuItems)
+type GetAllMenuItemsParams struct {
+	Limit  int32 `json:"limit"`
+	Offset int32 `json:"offset"`
+}
+
+func (q *Queries) GetAllMenuItems(ctx context.Context, arg GetAllMenuItemsParams) ([]MenuItem, error) {
+	rows, err := q.db.QueryContext(ctx, getAllMenuItems, arg.Limit, arg.Offset)
 	if err != nil {
 		return nil, err
 	}
@@ -65,6 +76,10 @@ func (q *Queries) GetAllMenuItems(ctx context.Context) ([]MenuItem, error) {
 			&i.Description,
 			&i.Price,
 			&i.CreatedAt,
+			&i.CreatedBy,
+			&i.UpdatedAt,
+			&i.UpdatedBy,
+			&i.Status,
 		); err != nil {
 			return nil, err
 		}
@@ -80,9 +95,10 @@ func (q *Queries) GetAllMenuItems(ctx context.Context) ([]MenuItem, error) {
 }
 
 const getMenuItem = `-- name: GetMenuItem :one
-SELECT id, name, description, price, created_at 
+SELECT id, name, description, price, created_at, created_by, updated_at, updated_by, status 
 FROM "MenuItem" 
-WHERE id = $1
+WHERE id = $1 
+LIMIT 1
 `
 
 func (q *Queries) GetMenuItem(ctx context.Context, id int32) (MenuItem, error) {
@@ -94,6 +110,10 @@ func (q *Queries) GetMenuItem(ctx context.Context, id int32) (MenuItem, error) {
 		&i.Description,
 		&i.Price,
 		&i.CreatedAt,
+		&i.CreatedBy,
+		&i.UpdatedAt,
+		&i.UpdatedBy,
+		&i.Status,
 	)
 	return i, err
 }
@@ -102,7 +122,7 @@ const updateMenuItem = `-- name: UpdateMenuItem :one
 UPDATE "MenuItem"
 SET name = $1, description = $2, price = $3 
 WHERE id = $4 
-RETURNING id, name, description, price, created_at
+RETURNING id, name, description, price, created_at, created_by, updated_at, updated_by, status
 `
 
 type UpdateMenuItemParams struct {
@@ -126,6 +146,10 @@ func (q *Queries) UpdateMenuItem(ctx context.Context, arg UpdateMenuItemParams) 
 		&i.Description,
 		&i.Price,
 		&i.CreatedAt,
+		&i.CreatedBy,
+		&i.UpdatedAt,
+		&i.UpdatedBy,
+		&i.Status,
 	)
 	return i, err
 }

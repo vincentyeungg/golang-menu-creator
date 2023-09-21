@@ -9,11 +9,14 @@ RETURNING *;
 -- name: GetIngredient :one
 SELECT * 
 FROM "Ingredient" 
-WHERE id = $1;
+WHERE id = $1 
+LIMIT 1;
 
 -- name: GetAllIngredient :many
 SELECT *
-FROM "Ingredient";
+FROM "Ingredient" 
+LIMIT $1 
+OFFSET $2;
 
 -- name: UpdateIngredient :one
 UPDATE "Ingredient"

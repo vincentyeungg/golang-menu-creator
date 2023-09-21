@@ -13,15 +13,16 @@ type Querier interface {
 	DeleteIngredient(ctx context.Context, id int32) error
 	DeleteMenu(ctx context.Context, id int32) error
 	DeleteMenuItem(ctx context.Context, id int32) error
-	GetAllIngredient(ctx context.Context) ([]Ingredient, error)
-	GetAllMenuItems(ctx context.Context) ([]MenuItem, error)
-	GetAllMenus(ctx context.Context) ([]Menu, error)
+	GetAllIngredient(ctx context.Context, arg GetAllIngredientParams) ([]Ingredient, error)
+	GetAllMenuItems(ctx context.Context, arg GetAllMenuItemsParams) ([]MenuItem, error)
+	GetAllMenus(ctx context.Context, arg GetAllMenusParams) ([]Menu, error)
 	GetIngredient(ctx context.Context, id int32) (Ingredient, error)
 	GetMenu(ctx context.Context, id int32) (Menu, error)
 	GetMenuItem(ctx context.Context, id int32) (MenuItem, error)
 	UpdateIngredient(ctx context.Context, arg UpdateIngredientParams) (Ingredient, error)
 	UpdateMenu(ctx context.Context, arg UpdateMenuParams) (Menu, error)
 	UpdateMenuItem(ctx context.Context, arg UpdateMenuItemParams) (MenuItem, error)
+	getAllItemsFromMenu(ctx context.Context, arg getAllItemsFromMenuParams) ([]getAllItemsFromMenuRow, error)
 }
 
 var _ Querier = (*Queries)(nil)

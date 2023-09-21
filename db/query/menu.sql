@@ -9,11 +9,14 @@ RETURNING *;
 -- name: GetMenu :one
 SELECT * 
 FROM "Menu" 
-WHERE id = $1;
+WHERE id = $1 
+LIMIT 1;
 
 -- name: GetAllMenus :many
 SELECT *
-FROM "Menu";
+FROM "Menu"
+LIMIT $1 
+OFFSET $2;
 
 -- name: UpdateMenu :one
 UPDATE "Menu"

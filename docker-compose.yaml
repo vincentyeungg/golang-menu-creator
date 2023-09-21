@@ -6,6 +6,8 @@ services:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=password
       - POSTGRES_DB=menu-creator-db
+    networks:
+      - menucreator-network
   api:
     build:
       context: .
@@ -19,3 +21,9 @@ services:
     # using entrypoint overrides the command in dockerfile, need to explicitly run command here
     entrypoint: [ "/app/wait-for.sh", "postgres:5432", "--", "/app/start.sh" ]
     command: [ "/app/main" ]
+    networks:
+      - menucreator-network
+
+networks:
+  menucreator-network:
+    driver: bridge
