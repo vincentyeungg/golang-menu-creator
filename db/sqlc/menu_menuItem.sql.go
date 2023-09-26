@@ -6,71 +6,184 @@ package db
 import (
 	"context"
 	"database/sql"
-	"time"
 )
 
-const getAllItemsFromMenu = `-- name: getAllItemsFromMenu :many
-SELECT mmi.id, menu_id, food_id, mmi.created_at, mmi.created_by, mmi.updated_at, mmi.updated_by, mmi.status, mi.id, name, description, price, mi.created_at, mi.created_by, mi.updated_at, mi.updated_by, mi.status 
+const createMenuMenuItem = `-- name: CreateMenuMenuItem :one
+INSERT INTO "Menu_MenuItem" (
+    menu_id, food_id, status 
+)
+VALUES ( 
+    $1, $2, $3 
+)
+RETURNING id, menu_id, food_id, created_at, created_by, updated_at, updated_by, status
+`
+
+type CreateMenuMenuItemParams struct {
+	MenuID int32          `json:"menu_id"`
+	FoodID int32          `json:"food_id"`
+	Status sql.NullString `json:"status"`
+}
+
+func (q *Queries) CreateMenuMenuItem(ctx context.Context, arg CreateMenuMenuItemParams) (MenuMenuItem, error) {
+	row := q.db.QueryRowContext(ctx, createMenuMenuItem, arg.MenuID, arg.FoodID, arg.Status)
+	var i MenuMenuItem
+	err := row.Scan(
+		&i.ID,
+		&i.MenuID,
+		&i.FoodID,
+		&i.CreatedAt,
+		&i.CreatedBy,
+		&i.UpdatedAt,
+		&i.UpdatedBy,
+		&i.Status,
+	)
+	return i, err
+}
+
+const deleteMenuFromMenu = `-- name: DeleteMenuFromMenu :exec
+DELETE FROM "Menu_MenuItem" 
+WHERE menu_id = $1 AND food_id = $2
+`
+
+type DeleteMenuFromMenuParams struct {
+	MenuID int32 `json:"menu_id"`
+	FoodID int32 `json:"food_id"`
+}
+
+func (q *Queries) DeleteMenuFromMenu(ctx context.Context, arg DeleteMenuFromMenuParams) error {
+	_, err := q.db.ExecContext(ctx, deleteMenuFromMenu, arg.MenuID, arg.FoodID)
+	return err
+}
+
+const getActiveItemFromMenu = `-- name: GetActiveItemFromMenu :one
+SELECT "mmi".menu_id, "mi".name, "mi".description, "mi".price 
 FROM "Menu_MenuItem" AS "mmi"
 JOIN "MenuItem" AS "mi" ON "mmi".food_id = "mi".id
-WHERE menu_id = $1 
+WHERE menu_id = $1 AND food_id = $2 AND status = 'A' 
+ORDER BY "mi".name 
+LIMIT $3 
+OFFSET $4
+`
+
+type GetActiveItemFromMenuParams struct {
+	MenuID int32 `json:"menu_id"`
+	FoodID int32 `json:"food_id"`
+	Limit  int32 `json:"limit"`
+	Offset int32 `json:"offset"`
+}
+
+type GetActiveItemFromMenuRow struct {
+	MenuID      int32  `json:"menu_id"`
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	Price       string `json:"price"`
+}
+
+func (q *Queries) GetActiveItemFromMenu(ctx context.Context, arg GetActiveItemFromMenuParams) (GetActiveItemFromMenuRow, error) {
+	row := q.db.QueryRowContext(ctx, getActiveItemFromMenu,
+		arg.MenuID,
+		arg.FoodID,
+		arg.Limit,
+		arg.Offset,
+	)
+	var i GetActiveItemFromMenuRow
+	err := row.Scan(
+		&i.MenuID,
+		&i.Name,
+		&i.Description,
+		&i.Price,
+	)
+	return i, err
+}
+
+const getAllActiveItemsFromMenu = `-- name: GetAllActiveItemsFromMenu :many
+SELECT "mmi".menu_id, "mi".name, "mi".description, "mi".price 
+FROM "Menu_MenuItem" AS "mmi"
+JOIN "MenuItem" AS "mi" ON "mmi".food_id = "mi".id
+WHERE menu_id = $1 AND status = 'A' 
+ORDER BY "mi".name 
 LIMIT $2 
 OFFSET $3
 `
 
-type getAllItemsFromMenuParams struct {
+type GetAllActiveItemsFromMenuParams struct {
 	MenuID int32 `json:"menu_id"`
 	Limit  int32 `json:"limit"`
 	Offset int32 `json:"offset"`
 }
 
-type getAllItemsFromMenuRow struct {
-	ID          int32          `json:"id"`
-	MenuID      int32          `json:"menu_id"`
-	FoodID      int32          `json:"food_id"`
-	CreatedAt   time.Time      `json:"created_at"`
-	CreatedBy   string         `json:"created_by"`
-	UpdatedAt   time.Time      `json:"updated_at"`
-	UpdatedBy   string         `json:"updated_by"`
-	Status      sql.NullString `json:"status"`
-	ID_2        int32          `json:"id_2"`
-	Name        string         `json:"name"`
-	Description string         `json:"description"`
-	Price       string         `json:"price"`
-	CreatedAt_2 time.Time      `json:"created_at_2"`
-	CreatedBy_2 string         `json:"created_by_2"`
-	UpdatedAt_2 time.Time      `json:"updated_at_2"`
-	UpdatedBy_2 string         `json:"updated_by_2"`
-	Status_2    sql.NullString `json:"status_2"`
+type GetAllActiveItemsFromMenuRow struct {
+	MenuID      int32  `json:"menu_id"`
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	Price       string `json:"price"`
 }
 
-func (q *Queries) getAllItemsFromMenu(ctx context.Context, arg getAllItemsFromMenuParams) ([]getAllItemsFromMenuRow, error) {
+func (q *Queries) GetAllActiveItemsFromMenu(ctx context.Context, arg GetAllActiveItemsFromMenuParams) ([]GetAllActiveItemsFromMenuRow, error) {
+	rows, err := q.db.QueryContext(ctx, getAllActiveItemsFromMenu, arg.MenuID, arg.Limit, arg.Offset)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []GetAllActiveItemsFromMenuRow{}
+	for rows.Next() {
+		var i GetAllActiveItemsFromMenuRow
+		if err := rows.Scan(
+			&i.MenuID,
+			&i.Name,
+			&i.Description,
+			&i.Price,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getAllItemsFromMenu = `-- name: GetAllItemsFromMenu :many
+SELECT "mmi".menu_id, "mi".name, "mi".description, "mi".price 
+FROM "Menu_MenuItem" AS "mmi"
+JOIN "MenuItem" AS "mi" ON "mmi".food_id = "mi".id
+WHERE menu_id = $1 
+ORDER BY "mi".name 
+LIMIT $2 
+OFFSET $3
+`
+
+type GetAllItemsFromMenuParams struct {
+	MenuID int32 `json:"menu_id"`
+	Limit  int32 `json:"limit"`
+	Offset int32 `json:"offset"`
+}
+
+type GetAllItemsFromMenuRow struct {
+	MenuID      int32  `json:"menu_id"`
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	Price       string `json:"price"`
+}
+
+func (q *Queries) GetAllItemsFromMenu(ctx context.Context, arg GetAllItemsFromMenuParams) ([]GetAllItemsFromMenuRow, error) {
 	rows, err := q.db.QueryContext(ctx, getAllItemsFromMenu, arg.MenuID, arg.Limit, arg.Offset)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	items := []getAllItemsFromMenuRow{}
+	items := []GetAllItemsFromMenuRow{}
 	for rows.Next() {
-		var i getAllItemsFromMenuRow
+		var i GetAllItemsFromMenuRow
 		if err := rows.Scan(
-			&i.ID,
 			&i.MenuID,
-			&i.FoodID,
-			&i.CreatedAt,
-			&i.CreatedBy,
-			&i.UpdatedAt,
-			&i.UpdatedBy,
-			&i.Status,
-			&i.ID_2,
 			&i.Name,
 			&i.Description,
 			&i.Price,
-			&i.CreatedAt_2,
-			&i.CreatedBy_2,
-			&i.UpdatedAt_2,
-			&i.UpdatedBy_2,
-			&i.Status_2,
 		); err != nil {
 			return nil, err
 		}

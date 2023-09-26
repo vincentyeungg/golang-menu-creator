@@ -10,19 +10,31 @@ type Querier interface {
 	CreateIngredient(ctx context.Context, arg CreateIngredientParams) (Ingredient, error)
 	CreateMenu(ctx context.Context, arg CreateMenuParams) (Menu, error)
 	CreateMenuItem(ctx context.Context, arg CreateMenuItemParams) (MenuItem, error)
+	CreateMenuItemIngredient(ctx context.Context, arg CreateMenuItemIngredientParams) (MenuItemIngredient, error)
+	CreateMenuMenuItem(ctx context.Context, arg CreateMenuMenuItemParams) (MenuMenuItem, error)
 	DeleteIngredient(ctx context.Context, id int32) error
+	DeleteIngredientFromItem(ctx context.Context, arg DeleteIngredientFromItemParams) error
 	DeleteMenu(ctx context.Context, id int32) error
+	DeleteMenuFromMenu(ctx context.Context, arg DeleteMenuFromMenuParams) error
 	DeleteMenuItem(ctx context.Context, id int32) error
+	GetActiveIngredientFromMenu(ctx context.Context, arg GetActiveIngredientFromMenuParams) (GetActiveIngredientFromMenuRow, error)
+	GetActiveItemFromMenu(ctx context.Context, arg GetActiveItemFromMenuParams) (GetActiveItemFromMenuRow, error)
+	GetAllActiveIngredients(ctx context.Context, arg GetAllActiveIngredientsParams) ([]Ingredient, error)
+	GetAllActiveIngredientsFromMenu(ctx context.Context, arg GetAllActiveIngredientsFromMenuParams) ([]GetAllActiveIngredientsFromMenuRow, error)
+	GetAllActiveItems(ctx context.Context, arg GetAllActiveItemsParams) ([]MenuItem, error)
+	GetAllActiveItemsFromMenu(ctx context.Context, arg GetAllActiveItemsFromMenuParams) ([]GetAllActiveItemsFromMenuRow, error)
+	GetAllActiveMenus(ctx context.Context, arg GetAllActiveMenusParams) ([]Menu, error)
 	GetAllIngredient(ctx context.Context, arg GetAllIngredientParams) ([]Ingredient, error)
+	GetAllIngredientsFromFood(ctx context.Context, arg GetAllIngredientsFromFoodParams) ([]GetAllIngredientsFromFoodRow, error)
+	GetAllItemsFromMenu(ctx context.Context, arg GetAllItemsFromMenuParams) ([]GetAllItemsFromMenuRow, error)
 	GetAllMenuItems(ctx context.Context, arg GetAllMenuItemsParams) ([]MenuItem, error)
 	GetAllMenus(ctx context.Context, arg GetAllMenusParams) ([]Menu, error)
 	GetIngredient(ctx context.Context, id int32) (Ingredient, error)
 	GetMenu(ctx context.Context, id int32) (Menu, error)
-	GetMenuItem(ctx context.Context, id int32) (MenuItem, error)
+	GetMenuItem(ctx context.Context, arg GetMenuItemParams) (MenuItem, error)
 	UpdateIngredient(ctx context.Context, arg UpdateIngredientParams) (Ingredient, error)
 	UpdateMenu(ctx context.Context, arg UpdateMenuParams) (Menu, error)
 	UpdateMenuItem(ctx context.Context, arg UpdateMenuItemParams) (MenuItem, error)
-	getAllItemsFromMenu(ctx context.Context, arg getAllItemsFromMenuParams) ([]getAllItemsFromMenuRow, error)
 }
 
 var _ Querier = (*Queries)(nil)

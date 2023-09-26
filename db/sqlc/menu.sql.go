@@ -47,9 +47,56 @@ func (q *Queries) DeleteMenu(ctx context.Context, id int32) error {
 	return err
 }
 
+const getAllActiveMenus = `-- name: GetAllActiveMenus :many
+SELECT id, name, description, created_at, created_by, updated_at, updated_by, status
+FROM "Menu"
+WHERE status = 'A'
+ORDER BY name 
+LIMIT $1 
+OFFSET $2
+`
+
+type GetAllActiveMenusParams struct {
+	Limit  int32 `json:"limit"`
+	Offset int32 `json:"offset"`
+}
+
+func (q *Queries) GetAllActiveMenus(ctx context.Context, arg GetAllActiveMenusParams) ([]Menu, error) {
+	rows, err := q.db.QueryContext(ctx, getAllActiveMenus, arg.Limit, arg.Offset)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []Menu{}
+	for rows.Next() {
+		var i Menu
+		if err := rows.Scan(
+			&i.ID,
+			&i.Name,
+			&i.Description,
+			&i.CreatedAt,
+			&i.CreatedBy,
+			&i.UpdatedAt,
+			&i.UpdatedBy,
+			&i.Status,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getAllMenus = `-- name: GetAllMenus :many
 SELECT id, name, description, created_at, created_by, updated_at, updated_by, status
 FROM "Menu"
+ORDER BY name 
 LIMIT $1 
 OFFSET $2
 `
@@ -116,7 +163,7 @@ func (q *Queries) GetMenu(ctx context.Context, id int32) (Menu, error) {
 
 const updateMenu = `-- name: UpdateMenu :one
 UPDATE "Menu"
-SET name = $1, description = $2
+SET name = $1, description = $2, updated_at = NOW() 
 WHERE id = $3 
 RETURNING id, name, description, created_at, created_by, updated_at, updated_by, status
 `

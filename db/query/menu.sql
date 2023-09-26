@@ -15,12 +15,21 @@ LIMIT 1;
 -- name: GetAllMenus :many
 SELECT *
 FROM "Menu"
+ORDER BY name 
+LIMIT $1 
+OFFSET $2;
+
+-- name: GetAllActiveMenus :many
+SELECT *
+FROM "Menu"
+WHERE status = 'A'
+ORDER BY name 
 LIMIT $1 
 OFFSET $2;
 
 -- name: UpdateMenu :one
 UPDATE "Menu"
-SET name = $1, description = $2
+SET name = $1, description = $2, updated_at = NOW() 
 WHERE id = $3 
 RETURNING *;
 

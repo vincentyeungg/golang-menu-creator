@@ -5,25 +5,32 @@ package db
 
 import (
 	"context"
+	"database/sql"
 )
 
 const createMenuItem = `-- name: CreateMenuItem :one
 INSERT INTO "MenuItem" (
-  name, description, price
+  name, description, price, status
 ) VALUES (
-  $1, $2, $3
+  $1, $2, $3, $4
 )
 RETURNING id, name, description, price, created_at, created_by, updated_at, updated_by, status
 `
 
 type CreateMenuItemParams struct {
-	Name        string `json:"name"`
-	Description string `json:"description"`
-	Price       string `json:"price"`
+	Name        string         `json:"name"`
+	Description string         `json:"description"`
+	Price       string         `json:"price"`
+	Status      sql.NullString `json:"status"`
 }
 
 func (q *Queries) CreateMenuItem(ctx context.Context, arg CreateMenuItemParams) (MenuItem, error) {
-	row := q.db.QueryRowContext(ctx, createMenuItem, arg.Name, arg.Description, arg.Price)
+	row := q.db.QueryRowContext(ctx, createMenuItem,
+		arg.Name,
+		arg.Description,
+		arg.Price,
+		arg.Status,
+	)
 	var i MenuItem
 	err := row.Scan(
 		&i.ID,
@@ -49,9 +56,57 @@ func (q *Queries) DeleteMenuItem(ctx context.Context, id int32) error {
 	return err
 }
 
+const getAllActiveItems = `-- name: GetAllActiveItems :many
+SELECT id, name, description, price, created_at, created_by, updated_at, updated_by, status
+FROM "MenuItem" 
+WHERE status = 'A'
+ORDER BY name 
+LIMIT $1 
+OFFSET $2
+`
+
+type GetAllActiveItemsParams struct {
+	Limit  int32 `json:"limit"`
+	Offset int32 `json:"offset"`
+}
+
+func (q *Queries) GetAllActiveItems(ctx context.Context, arg GetAllActiveItemsParams) ([]MenuItem, error) {
+	rows, err := q.db.QueryContext(ctx, getAllActiveItems, arg.Limit, arg.Offset)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []MenuItem{}
+	for rows.Next() {
+		var i MenuItem
+		if err := rows.Scan(
+			&i.ID,
+			&i.Name,
+			&i.Description,
+			&i.Price,
+			&i.CreatedAt,
+			&i.CreatedBy,
+			&i.UpdatedAt,
+			&i.UpdatedBy,
+			&i.Status,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getAllMenuItems = `-- name: GetAllMenuItems :many
 SELECT id, name, description, price, created_at, created_by, updated_at, updated_by, status
 FROM "MenuItem" 
+ORDER BY name 
 LIMIT $1 
 OFFSET $2
 `
@@ -97,12 +152,17 @@ func (q *Queries) GetAllMenuItems(ctx context.Context, arg GetAllMenuItemsParams
 const getMenuItem = `-- name: GetMenuItem :one
 SELECT id, name, description, price, created_at, created_by, updated_at, updated_by, status 
 FROM "MenuItem" 
-WHERE id = $1 
+WHERE id = $1 AND status = $2
 LIMIT 1
 `
 
-func (q *Queries) GetMenuItem(ctx context.Context, id int32) (MenuItem, error) {
-	row := q.db.QueryRowContext(ctx, getMenuItem, id)
+type GetMenuItemParams struct {
+	ID     int32          `json:"id"`
+	Status sql.NullString `json:"status"`
+}
+
+func (q *Queries) GetMenuItem(ctx context.Context, arg GetMenuItemParams) (MenuItem, error) {
+	row := q.db.QueryRowContext(ctx, getMenuItem, arg.ID, arg.Status)
 	var i MenuItem
 	err := row.Scan(
 		&i.ID,
@@ -120,7 +180,7 @@ func (q *Queries) GetMenuItem(ctx context.Context, id int32) (MenuItem, error) {
 
 const updateMenuItem = `-- name: UpdateMenuItem :one
 UPDATE "MenuItem"
-SET name = $1, description = $2, price = $3 
+SET name = $1, description = $2, price = $3, updated_at = NOW() 
 WHERE id = $4 
 RETURNING id, name, description, price, created_at, created_by, updated_at, updated_by, status
 `

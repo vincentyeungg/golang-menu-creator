@@ -49,9 +49,57 @@ func (q *Queries) DeleteIngredient(ctx context.Context, id int32) error {
 	return err
 }
 
+const getAllActiveIngredients = `-- name: GetAllActiveIngredients :many
+SELECT id, name, brand_name, description, created_at, created_by, updated_at, updated_by, status
+FROM "Ingredient" 
+WHERE status = 'A'
+ORDER BY name 
+LIMIT $1 
+OFFSET $2
+`
+
+type GetAllActiveIngredientsParams struct {
+	Limit  int32 `json:"limit"`
+	Offset int32 `json:"offset"`
+}
+
+func (q *Queries) GetAllActiveIngredients(ctx context.Context, arg GetAllActiveIngredientsParams) ([]Ingredient, error) {
+	rows, err := q.db.QueryContext(ctx, getAllActiveIngredients, arg.Limit, arg.Offset)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []Ingredient{}
+	for rows.Next() {
+		var i Ingredient
+		if err := rows.Scan(
+			&i.ID,
+			&i.Name,
+			&i.BrandName,
+			&i.Description,
+			&i.CreatedAt,
+			&i.CreatedBy,
+			&i.UpdatedAt,
+			&i.UpdatedBy,
+			&i.Status,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getAllIngredient = `-- name: GetAllIngredient :many
 SELECT id, name, brand_name, description, created_at, created_by, updated_at, updated_by, status
 FROM "Ingredient" 
+ORDER BY name 
 LIMIT $1 
 OFFSET $2
 `
@@ -120,7 +168,7 @@ func (q *Queries) GetIngredient(ctx context.Context, id int32) (Ingredient, erro
 
 const updateIngredient = `-- name: UpdateIngredient :one
 UPDATE "Ingredient"
-SET name = $1, brand_name = $2, description = $3 
+SET name = $1, brand_name = $2, description = $3, updated_at = NOW()
 WHERE id = $4 
 RETURNING id, name, brand_name, description, created_at, created_by, updated_at, updated_by, status
 `
