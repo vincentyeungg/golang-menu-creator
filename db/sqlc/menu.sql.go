@@ -9,9 +9,9 @@ import (
 
 const createMenu = `-- name: CreateMenu :one
 INSERT INTO "Menu" (
-  name, description
+  name, description, status, created_by, updated_by
 ) VALUES (
-  $1, $2
+  $1, $2, $3, $4, $5
 )
 RETURNING id, name, description, created_at, created_by, updated_at, updated_by, status
 `
@@ -19,10 +19,19 @@ RETURNING id, name, description, created_at, created_by, updated_at, updated_by,
 type CreateMenuParams struct {
 	Name        string `json:"name"`
 	Description string `json:"description"`
+	Status      string `json:"status"`
+	CreatedBy   string `json:"created_by"`
+	UpdatedBy   string `json:"updated_by"`
 }
 
 func (q *Queries) CreateMenu(ctx context.Context, arg CreateMenuParams) (Menu, error) {
-	row := q.db.QueryRowContext(ctx, createMenu, arg.Name, arg.Description)
+	row := q.db.QueryRowContext(ctx, createMenu,
+		arg.Name,
+		arg.Description,
+		arg.Status,
+		arg.CreatedBy,
+		arg.UpdatedBy,
+	)
 	var i Menu
 	err := row.Scan(
 		&i.ID,

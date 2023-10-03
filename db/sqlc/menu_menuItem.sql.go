@@ -5,27 +5,34 @@ package db
 
 import (
 	"context"
-	"database/sql"
 )
 
 const createMenuMenuItem = `-- name: CreateMenuMenuItem :one
 INSERT INTO "Menu_MenuItem" (
-    menu_id, food_id, status 
+    menu_id, food_id, status, created_by, updated_by
 )
 VALUES ( 
-    $1, $2, $3 
+    $1, $2, $3, $4, $5
 )
 RETURNING id, menu_id, food_id, created_at, created_by, updated_at, updated_by, status
 `
 
 type CreateMenuMenuItemParams struct {
-	MenuID int32          `json:"menu_id"`
-	FoodID int32          `json:"food_id"`
-	Status sql.NullString `json:"status"`
+	MenuID    int32  `json:"menu_id"`
+	FoodID    int32  `json:"food_id"`
+	Status    string `json:"status"`
+	CreatedBy string `json:"created_by"`
+	UpdatedBy string `json:"updated_by"`
 }
 
 func (q *Queries) CreateMenuMenuItem(ctx context.Context, arg CreateMenuMenuItemParams) (MenuMenuItem, error) {
-	row := q.db.QueryRowContext(ctx, createMenuMenuItem, arg.MenuID, arg.FoodID, arg.Status)
+	row := q.db.QueryRowContext(ctx, createMenuMenuItem,
+		arg.MenuID,
+		arg.FoodID,
+		arg.Status,
+		arg.CreatedBy,
+		arg.UpdatedBy,
+	)
 	var i MenuMenuItem
 	err := row.Scan(
 		&i.ID,
@@ -76,7 +83,7 @@ type GetActiveItemFromMenuRow struct {
 	MenuID      int32  `json:"menu_id"`
 	Name        string `json:"name"`
 	Description string `json:"description"`
-	Price       string `json:"price"`
+	Price       int64  `json:"price"`
 }
 
 func (q *Queries) GetActiveItemFromMenu(ctx context.Context, arg GetActiveItemFromMenuParams) (GetActiveItemFromMenuRow, error) {
@@ -116,7 +123,7 @@ type GetAllActiveItemsFromMenuRow struct {
 	MenuID      int32  `json:"menu_id"`
 	Name        string `json:"name"`
 	Description string `json:"description"`
-	Price       string `json:"price"`
+	Price       int64  `json:"price"`
 }
 
 func (q *Queries) GetAllActiveItemsFromMenu(ctx context.Context, arg GetAllActiveItemsFromMenuParams) ([]GetAllActiveItemsFromMenuRow, error) {
@@ -167,7 +174,7 @@ type GetAllItemsFromMenuRow struct {
 	MenuID      int32  `json:"menu_id"`
 	Name        string `json:"name"`
 	Description string `json:"description"`
-	Price       string `json:"price"`
+	Price       int64  `json:"price"`
 }
 
 func (q *Queries) GetAllItemsFromMenu(ctx context.Context, arg GetAllItemsFromMenuParams) ([]GetAllItemsFromMenuRow, error) {

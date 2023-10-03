@@ -1,8 +1,8 @@
 -- name: CreateIngredient :one
 INSERT INTO "Ingredient" (
-  name, brand_name, description
+  name, brand_name, description, status, created_by, updated_by
 ) VALUES (
-  $1, $2, $3
+  $1, $2, $3, $4, $5, $6
 )
 RETURNING *;
 

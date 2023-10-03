@@ -5,7 +5,6 @@ package db
 
 import (
 	"context"
-	"database/sql"
 	"time"
 )
 
@@ -20,9 +19,9 @@ RETURNING id, food_id, ingredient_id, created_at, created_by, updated_at, update
 `
 
 type CreateMenuItemIngredientParams struct {
-	FoodID       int32          `json:"food_id"`
-	IngredientID int32          `json:"ingredient_id"`
-	Status       sql.NullString `json:"status"`
+	FoodID       int32  `json:"food_id"`
+	IngredientID int32  `json:"ingredient_id"`
+	Status       string `json:"status"`
 }
 
 func (q *Queries) CreateMenuItemIngredient(ctx context.Context, arg CreateMenuItemIngredientParams) (MenuItemIngredient, error) {
@@ -73,23 +72,23 @@ type GetActiveIngredientFromMenuParams struct {
 }
 
 type GetActiveIngredientFromMenuRow struct {
-	ID           int32          `json:"id"`
-	FoodID       int32          `json:"food_id"`
-	IngredientID int32          `json:"ingredient_id"`
-	CreatedAt    time.Time      `json:"created_at"`
-	CreatedBy    string         `json:"created_by"`
-	UpdatedAt    time.Time      `json:"updated_at"`
-	UpdatedBy    string         `json:"updated_by"`
-	Status       sql.NullString `json:"status"`
-	ID_2         int32          `json:"id_2"`
-	Name         string         `json:"name"`
-	BrandName    string         `json:"brand_name"`
-	Description  string         `json:"description"`
-	CreatedAt_2  time.Time      `json:"created_at_2"`
-	CreatedBy_2  string         `json:"created_by_2"`
-	UpdatedAt_2  time.Time      `json:"updated_at_2"`
-	UpdatedBy_2  string         `json:"updated_by_2"`
-	Status_2     sql.NullString `json:"status_2"`
+	ID           int32     `json:"id"`
+	FoodID       int32     `json:"food_id"`
+	IngredientID int32     `json:"ingredient_id"`
+	CreatedAt    time.Time `json:"created_at"`
+	CreatedBy    string    `json:"created_by"`
+	UpdatedAt    time.Time `json:"updated_at"`
+	UpdatedBy    string    `json:"updated_by"`
+	Status       string    `json:"status"`
+	ID_2         int32     `json:"id_2"`
+	Name         string    `json:"name"`
+	BrandName    string    `json:"brand_name"`
+	Description  string    `json:"description"`
+	CreatedAt_2  time.Time `json:"created_at_2"`
+	CreatedBy_2  string    `json:"created_by_2"`
+	UpdatedAt_2  time.Time `json:"updated_at_2"`
+	UpdatedBy_2  string    `json:"updated_by_2"`
+	Status_2     string    `json:"status_2"`
 }
 
 func (q *Queries) GetActiveIngredientFromMenu(ctx context.Context, arg GetActiveIngredientFromMenuParams) (GetActiveIngredientFromMenuRow, error) {
@@ -134,23 +133,23 @@ type GetAllActiveIngredientsFromMenuParams struct {
 }
 
 type GetAllActiveIngredientsFromMenuRow struct {
-	ID           int32          `json:"id"`
-	FoodID       int32          `json:"food_id"`
-	IngredientID int32          `json:"ingredient_id"`
-	CreatedAt    time.Time      `json:"created_at"`
-	CreatedBy    string         `json:"created_by"`
-	UpdatedAt    time.Time      `json:"updated_at"`
-	UpdatedBy    string         `json:"updated_by"`
-	Status       sql.NullString `json:"status"`
-	ID_2         int32          `json:"id_2"`
-	Name         string         `json:"name"`
-	BrandName    string         `json:"brand_name"`
-	Description  string         `json:"description"`
-	CreatedAt_2  time.Time      `json:"created_at_2"`
-	CreatedBy_2  string         `json:"created_by_2"`
-	UpdatedAt_2  time.Time      `json:"updated_at_2"`
-	UpdatedBy_2  string         `json:"updated_by_2"`
-	Status_2     sql.NullString `json:"status_2"`
+	ID           int32     `json:"id"`
+	FoodID       int32     `json:"food_id"`
+	IngredientID int32     `json:"ingredient_id"`
+	CreatedAt    time.Time `json:"created_at"`
+	CreatedBy    string    `json:"created_by"`
+	UpdatedAt    time.Time `json:"updated_at"`
+	UpdatedBy    string    `json:"updated_by"`
+	Status       string    `json:"status"`
+	ID_2         int32     `json:"id_2"`
+	Name         string    `json:"name"`
+	BrandName    string    `json:"brand_name"`
+	Description  string    `json:"description"`
+	CreatedAt_2  time.Time `json:"created_at_2"`
+	CreatedBy_2  string    `json:"created_by_2"`
+	UpdatedAt_2  time.Time `json:"updated_at_2"`
+	UpdatedBy_2  string    `json:"updated_by_2"`
+	Status_2     string    `json:"status_2"`
 }
 
 func (q *Queries) GetAllActiveIngredientsFromMenu(ctx context.Context, arg GetAllActiveIngredientsFromMenuParams) ([]GetAllActiveIngredientsFromMenuRow, error) {
@@ -211,23 +210,23 @@ type GetAllIngredientsFromFoodParams struct {
 }
 
 type GetAllIngredientsFromFoodRow struct {
-	ID           int32          `json:"id"`
-	FoodID       int32          `json:"food_id"`
-	IngredientID int32          `json:"ingredient_id"`
-	CreatedAt    time.Time      `json:"created_at"`
-	CreatedBy    string         `json:"created_by"`
-	UpdatedAt    time.Time      `json:"updated_at"`
-	UpdatedBy    string         `json:"updated_by"`
-	Status       sql.NullString `json:"status"`
-	ID_2         int32          `json:"id_2"`
-	Name         string         `json:"name"`
-	BrandName    string         `json:"brand_name"`
-	Description  string         `json:"description"`
-	CreatedAt_2  time.Time      `json:"created_at_2"`
-	CreatedBy_2  string         `json:"created_by_2"`
-	UpdatedAt_2  time.Time      `json:"updated_at_2"`
-	UpdatedBy_2  string         `json:"updated_by_2"`
-	Status_2     sql.NullString `json:"status_2"`
+	ID           int32     `json:"id"`
+	FoodID       int32     `json:"food_id"`
+	IngredientID int32     `json:"ingredient_id"`
+	CreatedAt    time.Time `json:"created_at"`
+	CreatedBy    string    `json:"created_by"`
+	UpdatedAt    time.Time `json:"updated_at"`
+	UpdatedBy    string    `json:"updated_by"`
+	Status       string    `json:"status"`
+	ID_2         int32     `json:"id_2"`
+	Name         string    `json:"name"`
+	BrandName    string    `json:"brand_name"`
+	Description  string    `json:"description"`
+	CreatedAt_2  time.Time `json:"created_at_2"`
+	CreatedBy_2  string    `json:"created_by_2"`
+	UpdatedAt_2  time.Time `json:"updated_at_2"`
+	UpdatedBy_2  string    `json:"updated_by_2"`
+	Status_2     string    `json:"status_2"`
 }
 
 func (q *Queries) GetAllIngredientsFromFood(ctx context.Context, arg GetAllIngredientsFromFoodParams) ([]GetAllIngredientsFromFoodRow, error) {

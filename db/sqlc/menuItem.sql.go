@@ -5,23 +5,24 @@ package db
 
 import (
 	"context"
-	"database/sql"
 )
 
 const createMenuItem = `-- name: CreateMenuItem :one
 INSERT INTO "MenuItem" (
-  name, description, price, status
+  name, description, price, status, created_by, updated_by
 ) VALUES (
-  $1, $2, $3, $4
+  $1, $2, $3, $4, $5, $6
 )
 RETURNING id, name, description, price, created_at, created_by, updated_at, updated_by, status
 `
 
 type CreateMenuItemParams struct {
-	Name        string         `json:"name"`
-	Description string         `json:"description"`
-	Price       string         `json:"price"`
-	Status      sql.NullString `json:"status"`
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	Price       int64  `json:"price"`
+	Status      string `json:"status"`
+	CreatedBy   string `json:"created_by"`
+	UpdatedBy   string `json:"updated_by"`
 }
 
 func (q *Queries) CreateMenuItem(ctx context.Context, arg CreateMenuItemParams) (MenuItem, error) {
@@ -30,6 +31,8 @@ func (q *Queries) CreateMenuItem(ctx context.Context, arg CreateMenuItemParams) 
 		arg.Description,
 		arg.Price,
 		arg.Status,
+		arg.CreatedBy,
+		arg.UpdatedBy,
 	)
 	var i MenuItem
 	err := row.Scan(
@@ -157,8 +160,8 @@ LIMIT 1
 `
 
 type GetMenuItemParams struct {
-	ID     int32          `json:"id"`
-	Status sql.NullString `json:"status"`
+	ID     int32  `json:"id"`
+	Status string `json:"status"`
 }
 
 func (q *Queries) GetMenuItem(ctx context.Context, arg GetMenuItemParams) (MenuItem, error) {
@@ -188,7 +191,7 @@ RETURNING id, name, description, price, created_at, created_by, updated_at, upda
 type UpdateMenuItemParams struct {
 	Name        string `json:"name"`
 	Description string `json:"description"`
-	Price       string `json:"price"`
+	Price       int64  `json:"price"`
 	ID          int32  `json:"id"`
 }
 

@@ -1,8 +1,8 @@
 -- name: CreateMenu :one
 INSERT INTO "Menu" (
-  name, description
+  name, description, status, created_by, updated_by
 ) VALUES (
-  $1, $2
+  $1, $2, $3, $4, $5
 )
 RETURNING *;
 

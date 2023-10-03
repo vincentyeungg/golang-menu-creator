@@ -5,6 +5,8 @@ import "github.com/spf13/viper"
 // store all configuration of the application read from config file or environment variables
 type Config struct {
 	ServerAddress string `mapstructure:"SERVER_ADDR"`
+	DbSource string `mapstructure:"DB_SOURCE"`
+	DbDriver string `mapstructure:"DB_DRIVER"`
 }
 
 // read configuration from file or environment variables

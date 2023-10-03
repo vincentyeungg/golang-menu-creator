@@ -1,9 +1,9 @@
 -- name: CreateMenuMenuItem :one
 INSERT INTO "Menu_MenuItem" (
-    menu_id, food_id, status 
+    menu_id, food_id, status, created_by, updated_by
 )
 VALUES ( 
-    $1, $2, $3 
+    $1, $2, $3, $4, $5
 )
 RETURNING *;
 

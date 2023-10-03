@@ -9,9 +9,9 @@ import (
 
 const createIngredient = `-- name: CreateIngredient :one
 INSERT INTO "Ingredient" (
-  name, brand_name, description
+  name, brand_name, description, status, created_by, updated_by
 ) VALUES (
-  $1, $2, $3
+  $1, $2, $3, $4, $5, $6
 )
 RETURNING id, name, brand_name, description, created_at, created_by, updated_at, updated_by, status
 `
@@ -20,10 +20,20 @@ type CreateIngredientParams struct {
 	Name        string `json:"name"`
 	BrandName   string `json:"brand_name"`
 	Description string `json:"description"`
+	Status      string `json:"status"`
+	CreatedBy   string `json:"created_by"`
+	UpdatedBy   string `json:"updated_by"`
 }
 
 func (q *Queries) CreateIngredient(ctx context.Context, arg CreateIngredientParams) (Ingredient, error) {
-	row := q.db.QueryRowContext(ctx, createIngredient, arg.Name, arg.BrandName, arg.Description)
+	row := q.db.QueryRowContext(ctx, createIngredient,
+		arg.Name,
+		arg.BrandName,
+		arg.Description,
+		arg.Status,
+		arg.CreatedBy,
+		arg.UpdatedBy,
+	)
 	var i Ingredient
 	err := row.Scan(
 		&i.ID,
