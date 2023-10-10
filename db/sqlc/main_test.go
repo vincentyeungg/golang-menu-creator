@@ -7,18 +7,15 @@ import (
 	"testing"
 
 	_ "github.com/lib/pq"
-)
-
-const (
-	dbDriver = "postgres"
-	dbSource = "postgresql://postgres:password@localhost:5435/menu-creator-db?sslmode=disable"
+	"github.com/vincentyeungg/golang-menu-creator/config"
 )
 
 // need to access queries for sql db calls
 var testQueries *Queries
 
 func TestMain(m *testing.M) {
-	conn, err := sql.Open(dbDriver, dbSource)
+	config, err := config.LoadConfig("../..")
+	conn, err := sql.Open(config.DbDriver, config.DbSource)
 
 	if err != nil {
 		log.Fatal("cannot connect to db:", err)

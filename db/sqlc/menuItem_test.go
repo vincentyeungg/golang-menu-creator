@@ -69,10 +69,10 @@ func TestUpdateMenuItem(t *testing.T) {
 	menuItem1 := createRandomMenuItem(t)
 
 	arg := UpdateMenuItemParams{
-		ID: menuItem1.ID,
-		Name: util.RandomName(),
+		ID:          menuItem1.ID,
+		Name:        util.RandomName(),
 		Description: util.RandomDescription(),
-		Price: util.RandomPrice(),
+		Price:       util.RandomPrice(),
 	}
 
 	res, err := testQueries.UpdateMenuItem(context.Background(), arg)
@@ -111,7 +111,7 @@ func TestListMenuItems(t *testing.T) {
 	}
 
 	arg := GetAllMenuItemsParams{
-		Limit: 5,
+		Limit:  5,
 		Offset: 5,
 	}
 
@@ -130,7 +130,7 @@ func TestListActiveMenuItems(t *testing.T) {
 	}
 
 	arg := GetAllActiveItemsParams{
-		Limit: 5,
+		Limit:  5,
 		Offset: 5,
 	}
 

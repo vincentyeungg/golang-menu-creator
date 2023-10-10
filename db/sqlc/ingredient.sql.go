@@ -155,12 +155,17 @@ func (q *Queries) GetAllIngredient(ctx context.Context, arg GetAllIngredientPara
 const getIngredient = `-- name: GetIngredient :one
 SELECT id, name, brand_name, description, created_at, created_by, updated_at, updated_by, status 
 FROM "Ingredient" 
-WHERE id = $1 
+WHERE id = $1 AND status = $2 
 LIMIT 1
 `
 
-func (q *Queries) GetIngredient(ctx context.Context, id int32) (Ingredient, error) {
-	row := q.db.QueryRowContext(ctx, getIngredient, id)
+type GetIngredientParams struct {
+	ID     int32  `json:"id"`
+	Status string `json:"status"`
+}
+
+func (q *Queries) GetIngredient(ctx context.Context, arg GetIngredientParams) (Ingredient, error) {
+	row := q.db.QueryRowContext(ctx, getIngredient, arg.ID, arg.Status)
 	var i Ingredient
 	err := row.Scan(
 		&i.ID,

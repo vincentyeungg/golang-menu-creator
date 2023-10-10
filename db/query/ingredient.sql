@@ -9,7 +9,7 @@ RETURNING *;
 -- name: GetIngredient :one
 SELECT * 
 FROM "Ingredient" 
-WHERE id = $1 
+WHERE id = $1 AND status = $2 
 LIMIT 1;
 
 -- name: GetAllIngredient :many

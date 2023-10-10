@@ -29,7 +29,7 @@ type Querier interface {
 	GetAllItemsFromMenu(ctx context.Context, arg GetAllItemsFromMenuParams) ([]GetAllItemsFromMenuRow, error)
 	GetAllMenuItems(ctx context.Context, arg GetAllMenuItemsParams) ([]MenuItem, error)
 	GetAllMenus(ctx context.Context, arg GetAllMenusParams) ([]Menu, error)
-	GetIngredient(ctx context.Context, id int32) (Ingredient, error)
+	GetIngredient(ctx context.Context, arg GetIngredientParams) (Ingredient, error)
 	GetMenu(ctx context.Context, id int32) (Menu, error)
 	GetMenuItem(ctx context.Context, arg GetMenuItemParams) (MenuItem, error)
 	UpdateIngredient(ctx context.Context, arg UpdateIngredientParams) (Ingredient, error)
