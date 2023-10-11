@@ -10,10 +10,10 @@ import (
 
 const createMenuItemIngredient = `-- name: CreateMenuItemIngredient :one
 INSERT INTO "MenuItem_Ingredient" (
-    food_id, ingredient_id, status 
+    food_id, ingredient_id, status, created_by, updated_by
 )
 VALUES ( 
-    $1, $2, $3 
+    $1, $2, $3, $4, $5
 )
 RETURNING id, food_id, ingredient_id, created_at, created_by, updated_at, updated_by, status
 `
@@ -22,10 +22,18 @@ type CreateMenuItemIngredientParams struct {
 	FoodID       int32  `json:"food_id"`
 	IngredientID int32  `json:"ingredient_id"`
 	Status       string `json:"status"`
+	CreatedBy    string `json:"created_by"`
+	UpdatedBy    string `json:"updated_by"`
 }
 
 func (q *Queries) CreateMenuItemIngredient(ctx context.Context, arg CreateMenuItemIngredientParams) (MenuItemIngredient, error) {
-	row := q.db.QueryRowContext(ctx, createMenuItemIngredient, arg.FoodID, arg.IngredientID, arg.Status)
+	row := q.db.QueryRowContext(ctx, createMenuItemIngredient,
+		arg.FoodID,
+		arg.IngredientID,
+		arg.Status,
+		arg.CreatedBy,
+		arg.UpdatedBy,
+	)
 	var i MenuItemIngredient
 	err := row.Scan(
 		&i.ID,
@@ -42,16 +50,17 @@ func (q *Queries) CreateMenuItemIngredient(ctx context.Context, arg CreateMenuIt
 
 const deleteIngredientFromItem = `-- name: DeleteIngredientFromItem :exec
 DELETE FROM "MenuItem_Ingredient" 
-WHERE food_id = $1 AND ingredient_id = $2
+WHERE food_id = $1 AND ingredient_id = $2 AND created_by = $3
 `
 
 type DeleteIngredientFromItemParams struct {
-	FoodID       int32 `json:"food_id"`
-	IngredientID int32 `json:"ingredient_id"`
+	FoodID       int32  `json:"food_id"`
+	IngredientID int32  `json:"ingredient_id"`
+	CreatedBy    string `json:"created_by"`
 }
 
 func (q *Queries) DeleteIngredientFromItem(ctx context.Context, arg DeleteIngredientFromItemParams) error {
-	_, err := q.db.ExecContext(ctx, deleteIngredientFromItem, arg.FoodID, arg.IngredientID)
+	_, err := q.db.ExecContext(ctx, deleteIngredientFromItem, arg.FoodID, arg.IngredientID, arg.CreatedBy)
 	return err
 }
 
@@ -116,23 +125,23 @@ func (q *Queries) GetActiveIngredientFromMenu(ctx context.Context, arg GetActive
 	return i, err
 }
 
-const getAllActiveIngredientsFromMenu = `-- name: GetAllActiveIngredientsFromMenu :many
+const getAllActiveIngredientsFromFood = `-- name: GetAllActiveIngredientsFromFood :many
 SELECT mii.id, food_id, ingredient_id, mii.created_at, mii.created_by, mii.updated_at, mii.updated_by, mii.status, i.id, name, brand_name, description, i.created_at, i.created_by, i.updated_at, i.updated_by, i.status 
 FROM "MenuItem_Ingredient" AS "mii"
 JOIN "Ingredient" AS "i" ON "mii".ingredient_id = "i".id
-WHERE food_id = $1 
+WHERE food_id = $1 AND "mii".status = 'A' 
 ORDER BY "i".name 
 LIMIT $2 
 OFFSET $3
 `
 
-type GetAllActiveIngredientsFromMenuParams struct {
+type GetAllActiveIngredientsFromFoodParams struct {
 	FoodID int32 `json:"food_id"`
 	Limit  int32 `json:"limit"`
 	Offset int32 `json:"offset"`
 }
 
-type GetAllActiveIngredientsFromMenuRow struct {
+type GetAllActiveIngredientsFromFoodRow struct {
 	ID           int32     `json:"id"`
 	FoodID       int32     `json:"food_id"`
 	IngredientID int32     `json:"ingredient_id"`
@@ -152,15 +161,15 @@ type GetAllActiveIngredientsFromMenuRow struct {
 	Status_2     string    `json:"status_2"`
 }
 
-func (q *Queries) GetAllActiveIngredientsFromMenu(ctx context.Context, arg GetAllActiveIngredientsFromMenuParams) ([]GetAllActiveIngredientsFromMenuRow, error) {
-	rows, err := q.db.QueryContext(ctx, getAllActiveIngredientsFromMenu, arg.FoodID, arg.Limit, arg.Offset)
+func (q *Queries) GetAllActiveIngredientsFromFood(ctx context.Context, arg GetAllActiveIngredientsFromFoodParams) ([]GetAllActiveIngredientsFromFoodRow, error) {
+	rows, err := q.db.QueryContext(ctx, getAllActiveIngredientsFromFood, arg.FoodID, arg.Limit, arg.Offset)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	items := []GetAllActiveIngredientsFromMenuRow{}
+	items := []GetAllActiveIngredientsFromFoodRow{}
 	for rows.Next() {
-		var i GetAllActiveIngredientsFromMenuRow
+		var i GetAllActiveIngredientsFromFoodRow
 		if err := rows.Scan(
 			&i.ID,
 			&i.FoodID,
@@ -268,4 +277,27 @@ func (q *Queries) GetAllIngredientsFromFood(ctx context.Context, arg GetAllIngre
 		return nil, err
 	}
 	return items, nil
+}
+
+const getMenuItemIngredient = `-- name: GetMenuItemIngredient :one
+SELECT id, food_id, ingredient_id, created_at, created_by, updated_at, updated_by, status 
+FROM "MenuItem_Ingredient" 
+WHERE id = $1 
+LIMIT 1
+`
+
+func (q *Queries) GetMenuItemIngredient(ctx context.Context, id int32) (MenuItemIngredient, error) {
+	row := q.db.QueryRowContext(ctx, getMenuItemIngredient, id)
+	var i MenuItemIngredient
+	err := row.Scan(
+		&i.ID,
+		&i.FoodID,
+		&i.IngredientID,
+		&i.CreatedAt,
+		&i.CreatedBy,
+		&i.UpdatedAt,
+		&i.UpdatedBy,
+		&i.Status,
+	)
+	return i, err
 }

@@ -7,6 +7,12 @@ VALUES (
 )
 RETURNING *;
 
+-- name: GetMenuMenuItem :one
+SELECT * 
+FROM "Menu_MenuItem" 
+WHERE id = $1 
+LIMIT 1;
+
 -- name: GetAllItemsFromMenu :many
 SELECT "mmi".menu_id, "mi".name, "mi".description, "mi".price 
 FROM "Menu_MenuItem" AS "mmi"
@@ -20,7 +26,7 @@ OFFSET $3;
 SELECT "mmi".menu_id, "mi".name, "mi".description, "mi".price 
 FROM "Menu_MenuItem" AS "mmi"
 JOIN "MenuItem" AS "mi" ON "mmi".food_id = "mi".id
-WHERE menu_id = $1 AND status = 'A' 
+WHERE menu_id = $1 AND "mmi".status = 'A' 
 ORDER BY "mi".name 
 LIMIT $2 
 OFFSET $3;
@@ -36,4 +42,4 @@ OFFSET $4;
 
 -- name: DeleteMenuFromMenu :exec
 DELETE FROM "Menu_MenuItem" 
-WHERE menu_id = $1 AND food_id = $2;
+WHERE menu_id = $1 AND food_id = $2 AND created_by = $3;

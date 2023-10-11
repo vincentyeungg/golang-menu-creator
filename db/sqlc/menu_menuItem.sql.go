@@ -49,16 +49,17 @@ func (q *Queries) CreateMenuMenuItem(ctx context.Context, arg CreateMenuMenuItem
 
 const deleteMenuFromMenu = `-- name: DeleteMenuFromMenu :exec
 DELETE FROM "Menu_MenuItem" 
-WHERE menu_id = $1 AND food_id = $2
+WHERE menu_id = $1 AND food_id = $2 AND created_by = $3
 `
 
 type DeleteMenuFromMenuParams struct {
-	MenuID int32 `json:"menu_id"`
-	FoodID int32 `json:"food_id"`
+	MenuID    int32  `json:"menu_id"`
+	FoodID    int32  `json:"food_id"`
+	CreatedBy string `json:"created_by"`
 }
 
 func (q *Queries) DeleteMenuFromMenu(ctx context.Context, arg DeleteMenuFromMenuParams) error {
-	_, err := q.db.ExecContext(ctx, deleteMenuFromMenu, arg.MenuID, arg.FoodID)
+	_, err := q.db.ExecContext(ctx, deleteMenuFromMenu, arg.MenuID, arg.FoodID, arg.CreatedBy)
 	return err
 }
 
@@ -107,7 +108,7 @@ const getAllActiveItemsFromMenu = `-- name: GetAllActiveItemsFromMenu :many
 SELECT "mmi".menu_id, "mi".name, "mi".description, "mi".price 
 FROM "Menu_MenuItem" AS "mmi"
 JOIN "MenuItem" AS "mi" ON "mmi".food_id = "mi".id
-WHERE menu_id = $1 AND status = 'A' 
+WHERE menu_id = $1 AND "mmi".status = 'A' 
 ORDER BY "mi".name 
 LIMIT $2 
 OFFSET $3
@@ -203,4 +204,27 @@ func (q *Queries) GetAllItemsFromMenu(ctx context.Context, arg GetAllItemsFromMe
 		return nil, err
 	}
 	return items, nil
+}
+
+const getMenuMenuItem = `-- name: GetMenuMenuItem :one
+SELECT id, menu_id, food_id, created_at, created_by, updated_at, updated_by, status 
+FROM "Menu_MenuItem" 
+WHERE id = $1 
+LIMIT 1
+`
+
+func (q *Queries) GetMenuMenuItem(ctx context.Context, id int32) (MenuMenuItem, error) {
+	row := q.db.QueryRowContext(ctx, getMenuMenuItem, id)
+	var i MenuMenuItem
+	err := row.Scan(
+		&i.ID,
+		&i.MenuID,
+		&i.FoodID,
+		&i.CreatedAt,
+		&i.CreatedBy,
+		&i.UpdatedAt,
+		&i.UpdatedBy,
+		&i.Status,
+	)
+	return i, err
 }
