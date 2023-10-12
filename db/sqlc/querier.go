@@ -15,8 +15,8 @@ type Querier interface {
 	DeleteIngredient(ctx context.Context, id int32) error
 	DeleteIngredientFromItem(ctx context.Context, arg DeleteIngredientFromItemParams) error
 	DeleteMenu(ctx context.Context, id int32) error
-	DeleteMenuFromMenu(ctx context.Context, arg DeleteMenuFromMenuParams) error
 	DeleteMenuItem(ctx context.Context, id int32) error
+	DeleteMenuItemFromMenu(ctx context.Context, arg DeleteMenuItemFromMenuParams) error
 	GetActiveIngredientFromMenu(ctx context.Context, arg GetActiveIngredientFromMenuParams) (GetActiveIngredientFromMenuRow, error)
 	GetActiveItemFromMenu(ctx context.Context, arg GetActiveItemFromMenuParams) (GetActiveItemFromMenuRow, error)
 	GetAllActiveIngredients(ctx context.Context, arg GetAllActiveIngredientsParams) ([]Ingredient, error)

@@ -76,9 +76,9 @@ func TestDeleteMenuItemIngredient(t *testing.T) {
 	menuItemIngredient := CreateRandomMenuItemIngredient(t)
 
 	arg := DeleteIngredientFromItemParams{
-		FoodID: menuItemIngredient.FoodID,
+		FoodID:       menuItemIngredient.FoodID,
 		IngredientID: menuItemIngredient.IngredientID,
-		CreatedBy: menuItemIngredient.CreatedBy,
+		CreatedBy:    menuItemIngredient.CreatedBy,
 	}
 
 	err := testQueries.DeleteIngredientFromItem(context.Background(), arg)
@@ -100,8 +100,9 @@ func TestGetAllIngredientsFromFood(t *testing.T) {
 			IngredientID: ingredient.ID,
 			Status:       "A",
 			CreatedBy:    menuItem.CreatedBy,
+			UpdatedBy:    menuItem.UpdatedBy,
 		}
-	
+
 		res, err := testQueries.CreateMenuItemIngredient(context.Background(), arg)
 		require.NoError(t, err)
 		require.NotEmpty(t, res)
@@ -111,7 +112,7 @@ func TestGetAllIngredientsFromFood(t *testing.T) {
 
 	arg := GetAllIngredientsFromFoodParams{
 		FoodID: menuItem.ID,
-		Limit: 5,
+		Limit:  5,
 		Offset: 5,
 	}
 
@@ -139,7 +140,7 @@ func TestGetAllActiveIngredientsFromFood(t *testing.T) {
 			Status:       "A",
 			CreatedBy:    menuItem.CreatedBy,
 		}
-	
+
 		res, err := testQueries.CreateMenuItemIngredient(context.Background(), arg)
 		require.NoError(t, err)
 		require.NotEmpty(t, res)
@@ -149,7 +150,7 @@ func TestGetAllActiveIngredientsFromFood(t *testing.T) {
 
 	arg := GetAllActiveIngredientsFromFoodParams{
 		FoodID: menuItem.ID,
-		Limit: 5,
+		Limit:  5,
 		Offset: 5,
 	}
 

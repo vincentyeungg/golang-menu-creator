@@ -47,19 +47,19 @@ func (q *Queries) CreateMenuMenuItem(ctx context.Context, arg CreateMenuMenuItem
 	return i, err
 }
 
-const deleteMenuFromMenu = `-- name: DeleteMenuFromMenu :exec
+const deleteMenuItemFromMenu = `-- name: DeleteMenuItemFromMenu :exec
 DELETE FROM "Menu_MenuItem" 
 WHERE menu_id = $1 AND food_id = $2 AND created_by = $3
 `
 
-type DeleteMenuFromMenuParams struct {
+type DeleteMenuItemFromMenuParams struct {
 	MenuID    int32  `json:"menu_id"`
 	FoodID    int32  `json:"food_id"`
 	CreatedBy string `json:"created_by"`
 }
 
-func (q *Queries) DeleteMenuFromMenu(ctx context.Context, arg DeleteMenuFromMenuParams) error {
-	_, err := q.db.ExecContext(ctx, deleteMenuFromMenu, arg.MenuID, arg.FoodID, arg.CreatedBy)
+func (q *Queries) DeleteMenuItemFromMenu(ctx context.Context, arg DeleteMenuItemFromMenuParams) error {
+	_, err := q.db.ExecContext(ctx, deleteMenuItemFromMenu, arg.MenuID, arg.FoodID, arg.CreatedBy)
 	return err
 }
 
@@ -105,7 +105,7 @@ func (q *Queries) GetActiveItemFromMenu(ctx context.Context, arg GetActiveItemFr
 }
 
 const getAllActiveItemsFromMenu = `-- name: GetAllActiveItemsFromMenu :many
-SELECT "mmi".menu_id, "mi".name, "mi".description, "mi".price 
+SELECT "mmi".menu_id, "mi".name, "mi".description, "mi".price, "mi".status 
 FROM "Menu_MenuItem" AS "mmi"
 JOIN "MenuItem" AS "mi" ON "mmi".food_id = "mi".id
 WHERE menu_id = $1 AND "mmi".status = 'A' 
@@ -125,6 +125,7 @@ type GetAllActiveItemsFromMenuRow struct {
 	Name        string `json:"name"`
 	Description string `json:"description"`
 	Price       int64  `json:"price"`
+	Status      string `json:"status"`
 }
 
 func (q *Queries) GetAllActiveItemsFromMenu(ctx context.Context, arg GetAllActiveItemsFromMenuParams) ([]GetAllActiveItemsFromMenuRow, error) {
@@ -141,6 +142,7 @@ func (q *Queries) GetAllActiveItemsFromMenu(ctx context.Context, arg GetAllActiv
 			&i.Name,
 			&i.Description,
 			&i.Price,
+			&i.Status,
 		); err != nil {
 			return nil, err
 		}
@@ -156,7 +158,7 @@ func (q *Queries) GetAllActiveItemsFromMenu(ctx context.Context, arg GetAllActiv
 }
 
 const getAllItemsFromMenu = `-- name: GetAllItemsFromMenu :many
-SELECT "mmi".menu_id, "mi".name, "mi".description, "mi".price 
+SELECT "mmi".menu_id, "mi".name, "mi".description, "mi".price, "mi".status 
 FROM "Menu_MenuItem" AS "mmi"
 JOIN "MenuItem" AS "mi" ON "mmi".food_id = "mi".id
 WHERE menu_id = $1 
@@ -176,6 +178,7 @@ type GetAllItemsFromMenuRow struct {
 	Name        string `json:"name"`
 	Description string `json:"description"`
 	Price       int64  `json:"price"`
+	Status      string `json:"status"`
 }
 
 func (q *Queries) GetAllItemsFromMenu(ctx context.Context, arg GetAllItemsFromMenuParams) ([]GetAllItemsFromMenuRow, error) {
@@ -192,6 +195,7 @@ func (q *Queries) GetAllItemsFromMenu(ctx context.Context, arg GetAllItemsFromMe
 			&i.Name,
 			&i.Description,
 			&i.Price,
+			&i.Status,
 		); err != nil {
 			return nil, err
 		}
