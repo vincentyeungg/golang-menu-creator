@@ -8,10 +8,10 @@ dropdb:
 	docker exec -it menu-creator-postgres-1 dropdb menu-creator-db
 
 migrateup:
-	migrate -path db/migration -database "postgresql://postgres:password@postgres:5435/menu-creator-db?sslmode=disable" -verbose up
+	migrate -path db/migration -database "postgresql://postgres:password@postgres:5432/menu-creator-db?sslmode=disable" -verbose up
 
 migratedown:
-	migrate -path db/migration -database "postgresql://postgres:password@postgres:5435/menu-creator-db?sslmode=disable" -verbose down
+	migrate -path db/migration -database "postgresql://postgres:password@postgres:5432/menu-creator-db?sslmode=disable" -verbose down
 
 sqlc:
 	sqlc generate
