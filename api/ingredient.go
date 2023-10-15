@@ -7,6 +7,43 @@ import (
 	db "github.com/vincentyeungg/golang-menu-creator/db/sqlc"
 )
 
+type createIngredientRequest struct {
+	Name        string `json:"name" binding:"required"`
+	BrandName   string `json:"brand_name" binding:"required"`
+	Description string `json:"description" binding:"required"`
+	Status      string `json:"status" binding:"required"`
+	CreatedBy   string `json:"created_by" binding:"required"`
+	UpdatedBy   string `json:"updated_by" binding:"required"`
+}
+
+func (server *Server) createIngredient(ctx *gin.Context) {
+	var req createIngredientRequest
+
+	// verify input req arguments
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		return
+	}
+
+	arg := db.CreateIngredientParams{
+		Name:        req.Name,
+		BrandName:   req.BrandName,
+		Description: req.Description,
+		Status:      req.Status,
+		CreatedBy:   req.CreatedBy,
+		UpdatedBy:   req.UpdatedBy,
+	}
+
+	ingredient, err := server.store.CreateIngredient(ctx, arg)
+
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		return
+	}
+
+	ctx.JSON(http.StatusCreated, ingredient)
+}
+
 type getIngredientRequest struct {
 	ID     int32  `json:"id" binding:"required"`
 	Status string `json:"status" binding:"required"`
@@ -14,7 +51,6 @@ type getIngredientRequest struct {
 
 func (server *Server) getIngredient(ctx *gin.Context) {
 	var req getIngredientRequest
-	var err error
 
 	// verify input req arguments
 	if err := ctx.ShouldBindJSON(&req); err != nil {
@@ -36,4 +72,118 @@ func (server *Server) getIngredient(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, ingredient)
+}
+
+type updateIngredientRequest struct {
+	Name        string `json:"name" binding:"required"`
+	BrandName   string `json:"brand_name" binding:"required"`
+	Description string `json:"description" binding:"required"`
+	ID          int32  `json:"id" binding:"required"`
+}
+
+func (server *Server) updateIngredient(ctx *gin.Context) {
+	var req updateIngredientRequest
+
+	// verify input req arguments
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		return
+	}
+
+	arg := db.UpdateIngredientParams{
+		Name:        req.Name,
+		BrandName:   req.BrandName,
+		Description: req.Description,
+		ID:          req.ID,
+	}
+
+	ingredient, err := server.store.UpdateIngredient(ctx, arg)
+
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		return
+	}
+
+	ctx.JSON(http.StatusOK, ingredient)
+}
+
+type deleteIngredientRequest struct {
+	ID int32 `json:"id" binding:"required"`
+}
+
+func (server *Server) deleteIngredient(ctx *gin.Context) {
+	var req deleteIngredientRequest
+
+	// verify input req arguments
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		return
+	}
+
+	err := server.store.DeleteIngredient(ctx, req.ID)
+
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		return
+	}
+
+	ctx.JSON(http.StatusOK, nil)
+}
+
+type getAllActiveIngredientsRequest struct {
+	Limit  int32 `json:"limit" binding:"required"`
+	Offset int32 `json:"offset" binding:"required"`
+}
+
+func (server *Server) getAllActiveIngredients(ctx *gin.Context) {
+	var req getAllActiveIngredientsRequest
+
+	// verify input req arguments
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		return
+	}
+
+	arg := db.GetAllActiveIngredientsParams{
+		Limit:  req.Limit,
+		Offset: req.Offset,
+	}
+
+	ingredients, err := server.store.GetAllActiveIngredients(ctx, arg)
+
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		return
+	}
+
+	ctx.JSON(http.StatusOK, ingredients)
+}
+
+type GetAllIngredientsRequest struct {
+	Limit  int32 `json:"limit" binding:"required"`
+	Offset int32 `json:"offset" binding:"required"`
+}
+
+func (server *Server) getAllIngredients(ctx *gin.Context) {
+	var req GetAllIngredientsRequest
+
+	// verify input req arguments
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		return
+	}
+
+	arg := db.GetAllIngredientParams{
+		Limit:  req.Limit,
+		Offset: req.Offset,
+	}
+
+	ingredients, err := server.store.GetAllIngredient(ctx, arg)
+
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		return
+	}
+
+	ctx.JSON(http.StatusOK, ingredients)
 }

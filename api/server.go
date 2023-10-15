@@ -19,6 +19,11 @@ func SetupServer(store *db.Queries) *Server {
 	// ingredient routes
 	ingredientRoutes := router.Group("/api/ingredients")
 	ingredientRoutes.GET("/", server.getIngredient)
+	ingredientRoutes.GET("/all", server.getAllIngredients)
+	ingredientRoutes.GET("/active", server.getAllActiveIngredients)
+	ingredientRoutes.POST("/", server.createIngredient)
+	ingredientRoutes.PUT("/", server.updateIngredient)
+	ingredientRoutes.DELETE("/", server.deleteIngredient)
 
 	// menu item routes
 	menuItemRoutes := router.Group("/api/items")
