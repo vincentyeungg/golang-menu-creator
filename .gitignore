@@ -21,4 +21,4 @@
 go.work
 
 # environment variables
-*.env
+# *.env
