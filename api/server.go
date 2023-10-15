@@ -1,16 +1,24 @@
 package api
 
-import "github.com/gin-gonic/gin"
+import (
+	"github.com/gin-gonic/gin"
+	db "github.com/vincentyeungg/golang-menu-creator/db/sqlc"
+)
 
 // Server serves HTTP requests for this application
 // Server instance has router and db store
 type Server struct {
+	store  *db.Queries
 	router *gin.Engine
 }
 
-func SetupServer() *Server {
-	server := &Server{}
+func SetupServer(store *db.Queries) *Server {
+	server := &Server{store: store}
 	router := gin.Default()
+
+	// ingredient routes
+	ingredientRoutes := router.Group("/api/ingredients")
+	ingredientRoutes.GET("/", server.getIngredient)
 
 	// menu item routes
 	menuItemRoutes := router.Group("/api/items")
@@ -27,6 +35,10 @@ func SetupServer() *Server {
 	server.router = router
 
 	return server
+}
+
+func errorResponse(err error) gin.H {
+	return gin.H{"error": err.Error()}
 }
 
 // start server instance
