@@ -131,8 +131,8 @@ func (server *Server) deleteIngredient(ctx *gin.Context) {
 }
 
 type getAllActiveIngredientsRequest struct {
-	Limit  int32 `json:"limit" binding:"required"`
-	Offset int32 `json:"offset" binding:"required"`
+	PageID   int32 `json:"page_id" binding:"required"`
+	PageSize int32 `json:"page_size" binding:"required"`
 }
 
 func (server *Server) getAllActiveIngredients(ctx *gin.Context) {
@@ -145,8 +145,8 @@ func (server *Server) getAllActiveIngredients(ctx *gin.Context) {
 	}
 
 	arg := db.GetAllActiveIngredientsParams{
-		Limit:  req.Limit,
-		Offset: req.Offset,
+		Limit:  req.PageID,
+		Offset: (req.PageID - 1) * req.PageSize,
 	}
 
 	ingredients, err := server.store.GetAllActiveIngredients(ctx, arg)
@@ -160,8 +160,8 @@ func (server *Server) getAllActiveIngredients(ctx *gin.Context) {
 }
 
 type GetAllIngredientsRequest struct {
-	Limit  int32 `json:"limit" binding:"required"`
-	Offset int32 `json:"offset" binding:"required"`
+	PageID   int32 `json:"page_id" binding:"required"`
+	PageSize int32 `json:"page_size" binding:"required"`
 }
 
 func (server *Server) getAllIngredients(ctx *gin.Context) {
@@ -174,8 +174,8 @@ func (server *Server) getAllIngredients(ctx *gin.Context) {
 	}
 
 	arg := db.GetAllIngredientParams{
-		Limit:  req.Limit,
-		Offset: req.Offset,
+		Limit:  req.PageID,
+		Offset: (req.PageID - 1) * req.PageSize,
 	}
 
 	ingredients, err := server.store.GetAllIngredient(ctx, arg)
